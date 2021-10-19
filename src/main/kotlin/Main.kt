@@ -1,4 +1,3 @@
-import androidx.compose.desktop.LocalAppWindow
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -13,75 +12,156 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.imageFromResource
-import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asAwtImage
+import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.useResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.*
 import compose.Colors
 import kotlinx.coroutines.delay
+import steganography.Steganography
 import java.awt.FileDialog
 import java.awt.Frame
-import java.awt.Window
 import java.io.File
+import javax.imageio.ImageIO
 
 @Composable
 @Preview
 fun CasusApp() {
-    val selectedImage = painterResource("drawable/image_placeholder.png")
+    val selectedImage = remember { mutableStateOf(ImageBitmap(0, 0)) }
+    val isPictureSelected = remember { mutableStateOf(false) }
+
     val message = remember { mutableStateOf("") }
     val fileName = remember { mutableStateOf("") }
     val binaryImage = remember { mutableStateOf(false) }
 
     val isDialogOpen = remember { mutableStateOf(false) }
+    val isSaveDialogOpen = remember { mutableStateOf(false) }
+
+    val emptySpacesAlert = remember { mutableStateOf(false) }
+    val fileFormatAlert = remember { mutableStateOf(false) }
+
+    if (emptySpacesAlert.value) {
+        Dialog(
+            onCloseRequest = {
+                emptySpacesAlert.value = false
+            },
+            title = "Uyarı",
+            resizable = false
+        ) {
+            Box (modifier = Modifier.fillMaxSize()) {
+                Text("Lütfen boş alanları doldurun", fontSize = 24.sp, fontWeight = FontWeight.Medium, modifier = Modifier.align(Alignment.Center))
+            }
+        }
+    }
+
+    if (fileFormatAlert.value) {
+        Dialog(
+            onCloseRequest = {
+                fileFormatAlert.value = false
+            },
+            title = "Uyarı",
+            resizable = false
+        ) {
+            Box (modifier = Modifier.fillMaxSize()) {
+                Text("Lütfen resim dosyası seçin", fontSize = 24.sp, fontWeight = FontWeight.Medium, modifier = Modifier.align(Alignment.Center))
+            }
+        }
+    }
 
     if (isDialogOpen.value) {
         FileDialog(
             onCloseRequest = {
+                isDialogOpen.value = false
                 it?.let { path ->
                     if (
-                        path.endsWith(".png") ||
-                        path.endsWith(".jpg") ||
-                        path.endsWith(".jpeg")
+                        path.endsWith(".png")  ||
+                        path.endsWith(".jpg")  ||
+                        path.endsWith(".jpeg") ||
+                        path.endsWith(".bmp")
                     ) {
-
+                        try {
+                            val file = File(path)
+                            val inputStream = file.inputStream()
+                            val bitmap = loadImageBitmap(inputStream)
+                            selectedImage.value = bitmap
+                            isPictureSelected.value = true
+                        } catch (e: Exception) {
+                            println(e)
+                        }
+                    } else {
+                        fileFormatAlert.value = true
                     }
                 }
             }
         )
     }
+
+    if (isSaveDialogOpen.value) {
+        SaveFileDialog(
+            onCloseRequest = {
+                isSaveDialogOpen.value = !isSaveDialogOpen.value
+                it?.let { saveDirectory ->
+                    print(saveDirectory)
+                    try {
+                        val bufferedImage = selectedImage.value.asAwtImage()
+                        val steganography = Steganography()
+                        val result = steganography.hideText(bufferedImage, message.value, binaryImage.value)
+                        ImageIO.write(result.image, "png", File("$saveDirectory\\${fileName.value}.png"))
+                    } catch (e: Exception) {
+                        println(e)
+                    }
+                }
+                }
+        )
+    }
+
     Row(
         modifier = Modifier.fillMaxSize()
             .background(color = Color.White)
             .padding(10.dp)
     ) {
-        Box(
-            modifier = Modifier.fillMaxHeight()
-                .width(470.dp)
-                .padding(top = 4.dp, start = 8.dp)
-        ) {
-            Column {
-                Image(selectedImage, "", modifier = Modifier.width(400.dp).height(450.dp))
-                Button(
-                    onClick = {
-                        isDialogOpen.value = true
-                    },
-                    shape = RoundedCornerShape(size = 6.dp),
-                    colors = ButtonDefaults.buttonColors(backgroundColor = Colors.BLUE),
-                    modifier = Modifier.width(400.dp)
-                        .fillMaxHeight()
-                        .padding(top = 16.dp)
-                ) {
-                    Text("Resim Seç", color = Color.White, fontWeight = FontWeight.Bold)
-                }
-            }
-        }
         Column(
             modifier = Modifier.fillMaxHeight()
+                .width(430.dp)
+                .padding(top = 4.dp, start = 8.dp)
+        ) {
+            if (isPictureSelected.value) {
+                Image(selectedImage.value, "Image", modifier = Modifier.width(400.dp).height(450.dp))
+            } else {
+                Image(
+                    painterResource("drawable/image_placeholder.png"),
+                    "Placeholder",
+                    modifier = Modifier.width(400.dp).height(450.dp)
+                )
+            }
+            Button(
+                onClick = {
+                    isDialogOpen.value = true
+                },
+                shape = RoundedCornerShape(size = 6.dp),
+                colors = ButtonDefaults.buttonColors(backgroundColor = Colors.BLUE),
+                modifier = Modifier.width(400.dp)
+                    .fillMaxHeight()
+                    .padding(top = 16.dp)
+            ) {
+                Text("Resim Seç", color = Color.White, fontWeight = FontWeight.Bold)
+            }
+        }
+
+        Image(
+            painterResource("drawable/line.png"),
+            "Line",
+            modifier = Modifier.fillMaxHeight(0.95f).width(1.5.dp).align(Alignment.CenterVertically)
+        )
+
+        Column(
+            modifier = Modifier.fillMaxHeight(0.8f)
                 .width(730.dp)
-                .padding(top = 4.dp, end = 8.dp)
+                .padding(top = 16.dp, end = 16.dp, start = 16.dp)
         ) {
             TextField(
                 message.value,
@@ -101,7 +181,7 @@ fun CasusApp() {
                 },
                 modifier = Modifier.fillMaxWidth(),
                 label = {
-                    Text("Dosya ismi (.png)")
+                    Text("Dosya ismi")
                 }
             )
             Spacer(modifier = Modifier.padding(8.dp))
@@ -120,6 +200,25 @@ fun CasusApp() {
                     modifier = Modifier.padding(top = 1.dp, start = 2.dp)
                 )
             }
+            Button(
+                onClick = {
+                    if (isPictureSelected.value &&
+                        message.value.isNotEmpty() &&
+                        fileName.value.isNotEmpty()
+                    ) {
+                        isSaveDialogOpen.value = true
+                    } else {
+                        emptySpacesAlert.value = true
+                    }
+                },
+                shape = RoundedCornerShape(size = 6.dp),
+                colors = ButtonDefaults.buttonColors(backgroundColor = Colors.BLUE),
+                modifier = Modifier.fillMaxWidth()
+                    .height(100.dp)
+                    .padding(top = 32.dp)
+            ) {
+                Text("Kaydet", color = Color.White, fontWeight = FontWeight.Bold)
+            }
         }
     }
 }
@@ -130,11 +229,29 @@ private fun FileDialog(
     onCloseRequest: (result: String?) -> Unit
 ) = AwtWindow(
     create = {
-        object : FileDialog(parent, "Bir resim seçin", LOAD) {
+        object : java.awt.FileDialog(parent, "Bir resim seçin", LOAD) {
             override fun setVisible(value: Boolean) {
                 super.setVisible(value)
                 if (value) {
                     onCloseRequest(directory + file)
+                }
+            }
+        }
+    },
+    dispose = FileDialog::dispose
+)
+
+@Composable
+private fun SaveFileDialog(
+    parent: Frame? = null,
+    onCloseRequest: (result: String?) -> Unit
+) = AwtWindow(
+    create = {
+        object : java.awt.FileDialog(parent, "Kaydedilecek yeri seçin", SAVE) {
+            override fun setVisible(value: Boolean) {
+                super.setVisible(value)
+                if (value) {
+                    onCloseRequest(directory)
                 }
             }
         }
@@ -148,7 +265,7 @@ fun main() = application {
     val isPerformingTask = remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
-        delay(0)
+        delay(2000)
         isPerformingTask.value = false
     }
 
