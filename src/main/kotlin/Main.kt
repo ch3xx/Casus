@@ -14,8 +14,11 @@ import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAwtImage
+import androidx.compose.ui.input.key.Key.Companion.Menu
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.useResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,6 +30,9 @@ import java.awt.FileDialog
 import java.awt.Frame
 import java.io.File
 import javax.imageio.ImageIO
+
+const val SCREEN = 1
+const val SOLVER_SCREEN = 2
 
 @Composable
 @Preview
@@ -52,8 +58,13 @@ fun CasusApp() {
             title = "Uyarı",
             resizable = false
         ) {
-            Box (modifier = Modifier.fillMaxSize()) {
-                Text("Lütfen boş alanları doldurun", fontSize = 24.sp, fontWeight = FontWeight.Medium, modifier = Modifier.align(Alignment.Center))
+            Box(modifier = Modifier.fillMaxSize()) {
+                Text(
+                    "Lütfen boş alanları doldurun",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.align(Alignment.Center)
+                )
             }
         }
     }
@@ -66,8 +77,13 @@ fun CasusApp() {
             title = "Uyarı",
             resizable = false
         ) {
-            Box (modifier = Modifier.fillMaxSize()) {
-                Text("Lütfen resim dosyası seçin", fontSize = 24.sp, fontWeight = FontWeight.Medium, modifier = Modifier.align(Alignment.Center))
+            Box(modifier = Modifier.fillMaxSize()) {
+                Text(
+                    "Lütfen resim dosyası seçin",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.align(Alignment.Center)
+                )
             }
         }
     }
@@ -78,8 +94,8 @@ fun CasusApp() {
                 isDialogOpen.value = false
                 it?.let { path ->
                     if (
-                        path.endsWith(".png")  ||
-                        path.endsWith(".jpg")  ||
+                        path.endsWith(".png") ||
+                        path.endsWith(".jpg") ||
                         path.endsWith(".jpeg") ||
                         path.endsWith(".bmp")
                     ) {
@@ -115,7 +131,7 @@ fun CasusApp() {
                         println(e)
                     }
                 }
-                }
+            }
         )
     }
 
@@ -130,12 +146,17 @@ fun CasusApp() {
                 .padding(top = 4.dp, start = 8.dp)
         ) {
             if (isPictureSelected.value) {
-                Image(selectedImage.value, "Image", modifier = Modifier.width(400.dp).height(450.dp))
+                Image(
+                    selectedImage.value,
+                    "Image",
+                    modifier = Modifier.width(400.dp).height(450.dp),
+                    contentScale = ContentScale.Fit
+                )
             } else {
                 Image(
                     painterResource("drawable/image_placeholder.png"),
                     "Placeholder",
-                    modifier = Modifier.width(400.dp).height(450.dp)
+                    modifier = Modifier.width(400.dp).height(450.dp), contentScale = ContentScale.Fit
                 )
             }
             Button(
@@ -163,7 +184,7 @@ fun CasusApp() {
                 .width(730.dp)
                 .padding(top = 16.dp, end = 16.dp, start = 16.dp)
         ) {
-            TextField(
+            OutlinedTextField(
                 message.value,
                 {
                     message.value = it
@@ -174,7 +195,7 @@ fun CasusApp() {
                 }
             )
             Spacer(modifier = Modifier.padding(8.dp))
-            TextField(
+            OutlinedTextField(
                 fileName.value,
                 {
                     fileName.value = it
@@ -191,13 +212,11 @@ fun CasusApp() {
                     {
                         binaryImage.value = it
                     },
-                    colors = CheckboxDefaults.colors(checkedColor = Colors.LIGHT_BLUE)
+                    colors = CheckboxDefaults.colors(checkedColor = Colors.BLUE)
                 )
                 Text(
                     "Resmi Binary (siyah-beyaz) yap",
-                    fontWeight = FontWeight.Medium,
-                    color = Colors.BLUE,
-                    modifier = Modifier.padding(top = 1.dp, start = 2.dp)
+                    modifier = Modifier.padding(top = 1.dp, start = 3.dp)
                 )
             }
             Button(
@@ -218,6 +237,172 @@ fun CasusApp() {
                     .padding(top = 32.dp)
             ) {
                 Text("Kaydet", color = Color.White, fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+@Composable
+@Preview
+fun CasusAppSolver() {
+    val message = remember { mutableStateOf("") }
+    val key = remember { mutableStateOf("") }
+    val selectedImage = remember { mutableStateOf(ImageBitmap(0, 0)) }
+    val isPictureSelected = remember { mutableStateOf(false) }
+
+    val isDialogOpen = remember { mutableStateOf(false) }
+
+    val emptySpacesAlert = remember { mutableStateOf(false) }
+    val fileFormatAlert = remember { mutableStateOf(false) }
+
+    if (emptySpacesAlert.value) {
+        Dialog(
+            onCloseRequest = {
+                emptySpacesAlert.value = false
+            },
+            title = "Uyarı",
+            resizable = false
+        ) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Text(
+                    "Lütfen boş alanları doldurun",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+        }
+    }
+
+    if (fileFormatAlert.value) {
+        Dialog(
+            onCloseRequest = {
+                fileFormatAlert.value = false
+            },
+            title = "Uyarı",
+            resizable = false
+        ) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Text(
+                    "Lütfen resim dosyası seçin",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+        }
+    }
+
+    if (isDialogOpen.value) {
+        FileDialog(
+            onCloseRequest = {
+                isDialogOpen.value = false
+                it?.let { path ->
+                    if (
+                        path.endsWith(".png") ||
+                        path.endsWith(".jpg") ||
+                        path.endsWith(".jpeg") ||
+                        path.endsWith(".bmp")
+                    ) {
+                        try {
+                            val file = File(path)
+                            val inputStream = file.inputStream()
+                            val bitmap = loadImageBitmap(inputStream)
+                            selectedImage.value = bitmap
+                            isPictureSelected.value = true
+                        } catch (e: Exception) {
+                            println(e)
+                        }
+                    } else {
+                        fileFormatAlert.value = true
+                    }
+                }
+            }
+        )
+    }
+
+    Row(
+        modifier = Modifier.fillMaxSize()
+            .background(color = Color.White)
+            .padding(10.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxHeight()
+                .width(430.dp)
+                .padding(top = 4.dp, start = 8.dp)
+        ) {
+            if (isPictureSelected.value) {
+                Image(
+                    selectedImage.value,
+                    "Image",
+                    modifier = Modifier.width(400.dp).height(450.dp),
+                    contentScale = ContentScale.Fit
+                )
+            } else {
+                Image(
+                    painterResource("drawable/image_placeholder.png"),
+                    "Placeholder",
+                    modifier = Modifier.width(400.dp).height(450.dp), contentScale = ContentScale.Fit
+                )
+            }
+            Button(
+                onClick = {
+                    isDialogOpen.value = true
+                },
+                shape = RoundedCornerShape(size = 6.dp),
+                colors = ButtonDefaults.buttonColors(backgroundColor = Colors.BLUE),
+                modifier = Modifier.width(400.dp)
+                    .fillMaxHeight()
+                    .padding(top = 16.dp)
+            ) {
+                Text("Resim Seç", color = Color.White, fontWeight = FontWeight.Bold)
+            }
+        }
+
+        Image(
+            painterResource("drawable/line.png"),
+            "Line",
+            modifier = Modifier.fillMaxHeight(0.95f).width(1.5.dp).align(Alignment.CenterVertically)
+        )
+
+        Column(
+            modifier = Modifier.fillMaxHeight(0.8f)
+                .width(730.dp)
+                .padding(top = 16.dp, end = 16.dp, start = 16.dp)
+        ) {
+            OutlinedTextField(
+                key.value,
+                {
+                    key.value = it
+                },
+                modifier = Modifier.fillMaxWidth(),
+                label = {
+                    Text("Key")
+                }
+            )
+            Spacer(modifier = Modifier.padding(8.dp))
+            Button(
+                onClick = {
+                    if (isPictureSelected.value &&
+                        key.value.isNotEmpty()
+                    ) {
+                        val steganography = Steganography()
+                        message.value = steganography.extractText(selectedImage.value.asAwtImage(), key.value.toInt())
+                    } else {
+                        emptySpacesAlert.value = true
+                    }
+                },
+                shape = RoundedCornerShape(size = 6.dp),
+                colors = ButtonDefaults.buttonColors(backgroundColor = Colors.BLUE),
+                modifier = Modifier.fillMaxWidth()
+                    .height(100.dp)
+                    .padding(top = 32.dp)
+            ) {
+                Text("Çıkar", color = Color.White, fontWeight = FontWeight.Bold)
+            }
+            Spacer(modifier = Modifier.padding(8.dp))
+            if (message.value.isNotEmpty()) {
+                Text("Resimde gizlenmiş mesaj: ${message.value}", fontWeight = FontWeight.Bold, color = Colors.BLUE)
             }
         }
     }
@@ -263,6 +448,7 @@ fun main() = application {
     val icon = painterResource("CasusLogoLauncher.png")
     val logo = painterResource("CasusLogo.jpeg")
     val isPerformingTask = remember { mutableStateOf(true) }
+    val screen = remember { mutableStateOf(SCREEN) }
 
     LaunchedEffect(Unit) {
         delay(2000)
@@ -286,10 +472,24 @@ fun main() = application {
         ),
         resizable = false
     ) {
+        MenuBar {
+            Menu("File") {
+                Item("Gizleme", onClick = {
+                    screen.value = SCREEN
+                })
+                Item("Çıkarma", onClick = {
+                    screen.value = SOLVER_SCREEN
+                })
+                Item("Çık", onClick = ::exitApplication)
+            }
+        }
+
         if (isPerformingTask.value) {
             Box(Modifier.paint(logo).fillMaxSize())
         } else {
-            CasusApp()
+            if (screen.value == SCREEN) CasusApp()
+            else if (screen.value == SOLVER_SCREEN) CasusAppSolver()
+            else isPerformingTask.value = true
         }
     }
 }
