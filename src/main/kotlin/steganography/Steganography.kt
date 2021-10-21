@@ -1,18 +1,28 @@
 package steganography
 
+import util.Resource
 import model.Result
+import util.Constants.ERROR_WRONG_KEY
 import util.rgbToBinaryImage
 
 import java.awt.image.BufferedImage
+import java.util.*
 
 class Steganography {
     private val mask = 0x00000001
+    private val base64Util = Base64Util()
 
-    fun hideText(image: BufferedImage, text: String, binaryImage: Boolean): Result {
+    fun hideText(image: BufferedImage, inputText: String, binaryImage: Boolean): Result {
         val coverImage = when (binaryImage) {
             true -> rgbToBinaryImage(image)
             false -> image
         }
+        val result = base64Util.encode(inputText)
+        val text = result.base64
+        val key = result.key
+
+        println("$text + $key")
+
         var bit: Int
         var x = 0
         var y = 0
@@ -52,10 +62,10 @@ class Steganography {
                 bit = bit shr 1
             }
         }
-        return Result(coverImage, text.length)
+        return Result(coverImage, key)
     }
 
-    fun extractText(coverImage: BufferedImage, key: Int): String {
+    fun extractText(coverImage: BufferedImage, key: Int): Resource<String> {
         var x = 0
         var y = 0
         var f: Int
@@ -83,6 +93,27 @@ class Steganography {
             c[i] = bit.toChar()
             message += c[i]
         }
-        return message
+        return try {
+            Resource.Success(base64Util.decode(message))
+        } catch (e: Exception) {
+            Resource.Error(ERROR_WRONG_KEY)
+        }
+    }
+
+    class Base64Util {
+        private val encoder = Base64.getEncoder()
+        private val decoder = Base64.getDecoder()
+
+        fun encode(text: String): EncoderResult {
+            val base64 = encoder.encodeToString(text.toByteArray())
+            return EncoderResult(base64, base64.length)
+        }
+
+        fun decode(base64: String): String {
+            val bytes = decoder.decode(base64)
+            return String(bytes)
+        }
+
+        data class EncoderResult(val base64: String, val key: Int)
     }
 }
