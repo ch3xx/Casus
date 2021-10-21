@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.AwtWindow
@@ -18,7 +19,7 @@ import java.awt.FileDialog
 import java.awt.Frame
 
 @Composable
-fun FileDialog(
+fun SelectFileDialog(
     parent: Frame? = null,
     onCloseRequest: (result: String?) -> Unit
 ) = AwtWindow(
@@ -65,6 +66,7 @@ fun AlertDialog(onCloseRequest: () -> Unit, text: String) {
                 text,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center,
                 modifier = Modifier.align(Alignment.Center)
                     .padding(bottom = 16.dp)
             )
