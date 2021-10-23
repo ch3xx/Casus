@@ -21,8 +21,6 @@ class Steganography {
         val text = result.base64
         val key = result.key
 
-        println("$text + $key")
-
         var bit: Int
         var x = 0
         var y = 0

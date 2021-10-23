@@ -2,10 +2,6 @@ package util
 
 import java.awt.Color
 import java.awt.image.BufferedImage
-import java.io.File
-import javax.imageio.ImageIO
-
-fun getImage(path: String): BufferedImage = ImageIO.read(File(path))
 
 fun rgbToBinaryImage(image: BufferedImage): BufferedImage {
     val h = image.height

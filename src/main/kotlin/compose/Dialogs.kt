@@ -1,52 +1,39 @@
 package compose
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.AwtWindow
 import androidx.compose.ui.window.Dialog
+import model.FileModel
 import java.awt.FileDialog
+import java.awt.FileDialog.LOAD
+import java.awt.FileDialog.SAVE
 import java.awt.Frame
 
 @Composable
-fun SelectFileDialog(
+fun FileDialog(
     parent: Frame? = null,
-    onCloseRequest: (result: String?) -> Unit
+    mode: Int,
+    onCloseRequest: (result: FileModel) -> Unit
 ) = AwtWindow(
     create = {
-        object : FileDialog(parent, "Bir resim seçin", LOAD) {
-            override fun setVisible(value: Boolean) {
-                super.setVisible(value)
-                if (value) {
-                    onCloseRequest(directory + file)
-                }
-            }
+        val title = when(mode) {
+            SAVE -> "Kaydedilecek yeri seçin"
+            LOAD -> "Bir resim seçin"
+            else -> "Dosya"
         }
-    },
-    dispose = FileDialog::dispose
-)
-
-@Composable
-fun SaveFileDialog(
-    parent: Frame? = null,
-    onCloseRequest: (result: String?) -> Unit
-) = AwtWindow(
-    create = {
-        object : FileDialog(parent, "Kaydedilecek yeri seçin", SAVE) {
+        object : FileDialog(parent, title, mode) {
             override fun setVisible(value: Boolean) {
                 super.setVisible(value)
                 if (value) {
-                    onCloseRequest(directory)
+                    onCloseRequest(FileModel(file, directory))
                 }
             }
         }
