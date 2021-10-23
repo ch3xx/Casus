@@ -1,9 +1,5 @@
-![](https://github.com/ch3xx/Casus/blob/main/screenshots/1-Main%20Screen%20-%201.PNG)
+# Brute Force
 
-Uygulamayı açtığında karşınıza böyle bir ekran gelmelidir.
+Dosyayı seçtikten sonra "max try" değerini girin. "Başlat"a bastıktan sonra resimde gizlenmiş olası mesajları görebilirsiniz.
 
-Gizleme için [hiding](https://github.com/ch3xx/Casus/tree/main/tutorials/hiding)
-
-Çıkarma için [extraction](https://github.com/ch3xx/Casus/tree/main/tutorials/extraction)
-
-Brute Force için [brute_force](https://github.com/ch3xx/Casus/tree/main/tutorials/brute_force)
+![](https://github.com/ch3xx/Casus/blob/main/screenshots/3-Brute%20Force%20Screen%20%20-%201.PNG)
