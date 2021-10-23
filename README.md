@@ -60,4 +60,5 @@ fun hideText(image: BufferedImage, inputText: String, binaryImage: Boolean): Res
             }
         }
         return Result(coverImage, key)
-    }```
+    }
+```
