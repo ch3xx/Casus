@@ -9,7 +9,7 @@
 [tr] Casus, Kotlin temelli bir "Steganografi" tooludur. Bu projedeki amaç resime veri gizleme işlemlerini olabildiğince basit hale getirmektir.
 
 
-## Kullanım için [a link](https://github.com/ch3xx/Casus/blob/main/tutorials) içine bakın
+## Kullanım için [tutorials](https://github.com/ch3xx/Casus/blob/main/tutorials) içine bakın
 
  
 # Resime veri ekleme ve çıkarma algoritmaları
