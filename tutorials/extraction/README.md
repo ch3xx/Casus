@@ -1,4 +1,4 @@
-# Gizleme
+# Çıkarma
 
 Dosyayı seçtikten sonra size verilen key'i girin. "Çıkar"a bastıktan sonra resimde gizlenmiş mesajı size vermelidir.
 
