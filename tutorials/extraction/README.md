@@ -1,19 +1,5 @@
 # Gizleme
 
-İlk olarak bir resim seçin
+Dosyayı seçtikten sonra size verilen key'i girin. "Çıkar"a bastıktan sonra resimde gizlenmiş mesajı size vermelidir.
 
-![](https://github.com/ch3xx/Casus/blob/main/screenshots/0-Select%20Image%20Dialog.PNG)
-
-
-
-
-Daha sonra resime gizlemek istediğiniz mesajı girin
-
-![](https://github.com/ch3xx/Casus/blob/main/screenshots/1-Main%20Screen%20-%202.PNG)
-
-
-
-
-Son olarak "Kaydet" diyip kaydetmek istediğinz yeri seçin
-
-![](https://github.com/ch3xx/Casus/blob/main/screenshots/0-Save%20Image%20Dialog.PNG)
+![](https://github.com/ch3xx/Casus/blob/main/screenshots/2-Extraction%20Screen%20-%201.PNG)
