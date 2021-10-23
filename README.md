@@ -10,6 +10,8 @@
  
 # Resime veri ekleme ve çıkarma algoritmaları
 
+Resmin içine mesaj gizleme:
+
 ```kotlin
 fun hideText(image: BufferedImage, inputText: String, binaryImage: Boolean): Result {
         val coverImage = when (binaryImage) {
@@ -60,5 +62,44 @@ fun hideText(image: BufferedImage, inputText: String, binaryImage: Boolean): Res
             }
         }
         return Result(coverImage, key)
+    }
+```
+
+Resmin içine gizlenen mesajı çıkarma:
+
+```kotlin
+fun extractText(coverImage: BufferedImage, key: Int): Resource<String> {
+        var x = 0
+        var y = 0
+        var f: Int
+        val c = CharArray(key)
+        var message = ""
+        for (i in 0 until key) {
+            var bit = 0
+            for (j in 0..7) {
+                if (x < coverImage.width) {
+                    f = coverImage.getRGB(x, y) and mask
+                    x++
+                } else {
+                    x = 0
+                    y++
+                    f = coverImage.getRGB(x, y) and mask
+                }
+
+                if (f == 1) {
+                    bit = bit shr 1
+                    bit = bit or 0x80
+                } else {
+                    bit = bit shr 1
+                }
+            }
+            c[i] = bit.toChar()
+            message += c[i]
+        }
+        return try {
+            Resource.Success(base64Util.decode(message))
+        } catch (e: Exception) {
+            Resource.Error(ERROR_WRONG_KEY)
+        }
     }
 ```
